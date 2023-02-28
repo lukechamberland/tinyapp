@@ -41,4 +41,15 @@ app.get("/urls/:id", (req, res) => { // fix elow
   res.render("urls_show", templateVars);
 });
 
-app.use(express.urlencoded({ extended: true }));
+app.post("/urls", (req, res) => {
+  console.log(req.body); // Log the POST request body to the console
+  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+});
+
+function generateRandomString() {
+  newQty = ''
+  for (let i = 0; i < 6; i++) {
+    newQty += random(i)
+  }
+  return newQty
+}
