@@ -47,6 +47,5 @@ app.post("/urls", (req, res) => {
 });
 
 function generateRandomString() {
-  let characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
   return Math.random().toString(36).substr(2, 6);
 }
