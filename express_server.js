@@ -42,8 +42,10 @@ app.get("/urls/:id", (req, res) => { // fix elow
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  let id = generateRandomString()
+  let longURL = req.body.longURL; // Log the POST request body to the console
+  urlDatabase[id] = longURL
+  res.redirect(`/urls/${id}`); // Respond with 'Ok' (we will replace this)
 });
 
 function generateRandomString() {
