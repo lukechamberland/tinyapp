@@ -37,7 +37,7 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => { // fix elow
-  const templateVars = { id: req.params.id, longURL: req.body.longURL };
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id]};
   res.render("urls_show", templateVars);
 });
 
@@ -47,9 +47,5 @@ app.post("/urls", (req, res) => {
 });
 
 function generateRandomString() {
-  newQty = ''
-  for (let i = 0; i < 6; i++) {
-    newQty += random(i)
-  }
-  return newQty
+  
 }
