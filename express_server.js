@@ -42,9 +42,9 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  let id = generateRandomString()
+  let id = generateRandomString();
   let longURL = req.body.longURL;
-  urlDatabase[id] = longURL
+  urlDatabase[id] = longURL;
   res.redirect(`/urls/${id}`);
 });
 
@@ -53,16 +53,16 @@ function generateRandomString() {
 }
 
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id]
+  const longURL = urlDatabase[req.params.id];
   res.redirect(longURL);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id]
-  res.redirect("/urls")
+  res.redirect("/urls");
 });
 
 app.post("/urls/:id", (req, res) => {
   urlDatabase[req.params.id] = req.body.longURL
-  res.redirect("/urls")
-})
+  res.redirect("/urls");
+});
