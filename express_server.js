@@ -65,4 +65,10 @@ app.post("/urls/:id/delete", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   urlDatabase[req.params.id] = req.body.longURL
   res.redirect("/urls");
-});;
+});
+
+app.post("/login", (req, res) => {
+  console.log('hello');
+  res.cookie('username', req.body.username);
+  res.redirect("/urls");
+});
