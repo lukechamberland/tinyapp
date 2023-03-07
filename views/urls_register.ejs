@@ -1,28 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- Bootstrap CSS -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
     <link
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
       integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
       crossorigin="anonymous"
     />
-    <title>URL - TinyApp Example</title>
+    <title>TinyApp</title>
   </head>
-
   <body>
     <%- include("partials/_header", {username: username}) %>
-    <div class="card text-center">
-      <div class="card-header"></div>
-      <div class="card-body">
-        <h5 class="card-title">TinyURL for: <%= longURL %></h5>
-        <p class="card-text">
-          Short URL ID: <a href="/u/<%= id %>"><%= id %></a>
-        </p>
-      </div>
-      <div class="card-footer text-muted"></div>
-    </div>
+    <main style="margin: 1em;">
+      <form action="/register" method="POST">
+        <input type="email" name="email">
+        <input type="password" name="password">
+        <button type="submit">
+          submit
+        </button>
+      </form>
+    </main>
+    
+    <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
       integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
@@ -40,5 +44,3 @@
     ></script>
   </body>
 </html>
-
-<form method = "post" action = "/urls/<%=id%>"><input type="text" value="test" name = "longURL"><input type="submit" value = "Update" ></form>
