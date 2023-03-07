@@ -133,3 +133,8 @@ const getUserByEmail = function(userDB, email) {
   }
   return null;
 }
+
+app.get("/login", (req, res) => {
+  const templateVars = { urls: urlDatabase, username: req.cookies["username"]};
+  res.render("urls_login", templateVars);
+});

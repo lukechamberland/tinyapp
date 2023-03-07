@@ -17,28 +17,15 @@
   <body>
     <%- include("partials/_header") %>
     <main style="margin: 1em;">
-      <h3>My URLs</h3>
-      <table class="table">
-        <thead>
-          <tr>
-            <th scope="col">Short URL ID</th>
-            <th scope="col">Long URL</th>
-            <th scope="col">action</th>
-            <th scope="col">edit</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% for (let id in urls) { %>
-            <tr>
-              <td><%= id %></td>
-              <td><%= urls[id] %></td>
-              <td><form method="POST" action="/urls/<%= id %>/delete"><input type = "submit" value = "Delete"></form></td>
-              <td><form method="get" action="/urls/<%= id %>"><input type = "submit" value = "edit"></form></td>
-            </tr>
-          <% } %>
-        </tbody>
-      </table>
+      <form action="/login" method="POST">
+        <input type="email" name="email">
+        <input type="password" name="password">
+        <button type="submit">
+          submit
+        </button>
+      </form>
     </main>
+    
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
