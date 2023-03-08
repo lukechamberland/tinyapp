@@ -71,12 +71,12 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id]
+  delete urlDatabase[req.params.id];
   res.redirect("/urls");
 });
 
 app.post("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id] = req.body.longURL
+  urlDatabase[req.params.id] = req.body.longURL;
   res.redirect("/urls");
 });
 
@@ -86,22 +86,19 @@ app.post("/login", (req, res) => {
     res.send("email and password cannot be entered");
     return;
   }
-  const user = getUserByEmail(users, email)
+  const user = getUserByEmail(users, email);
   if (!user) {
-    res.redirect("/login")
+    res.redirect("/login");
     return;
   }
-  const id = user.id
-  res.cookie("user_id", id)
-  res.redirect("/urls")
-  /*console.log('hello', req.body);
-  res.cookie('username', req.body.username);
-  res.redirect("/urls");*/
+  const id = user.id;
+  res.cookie("user_id", id);
+  res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
-  res.redirect("/urls")
+  res.redirect("/urls");
 });
 
 app.get("/register", (req, res) => {
@@ -110,27 +107,27 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  console.log(req.body)
-  const {email, password} = req.body
+  console.log(req.body);
+  const {email, password} = req.body;
   if(!email || !password) {
-    res.statusMessage = "Enter email and password. "
-    res.status(400).end()
+    res.statusMessage = "Enter email and password. ";
+    res.status(400).end();
     return; 
   }
   
-  const user = getUserByEmail(users, email)
+  const user = getUserByEmail(users, email);
   if (user) {
     res.send('User already exists, use another email');
   }
-  const id = generateRandomString()
+  const id = generateRandomString();
   users[id] = {
     id, 
     email, 
     password
   }
   res.cookie('user_id', id);
-  console.log(users)
-  res.redirect("/urls")
+  console.log(users);
+  res.redirect("/urls");
 })
 
 const getUserByEmail = function(userDB, email) {
