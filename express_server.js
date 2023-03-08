@@ -81,18 +81,31 @@ app.post("/urls/:id", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  console.log('hello', req.body);
+  const {email, password} = req.body;
+  if (!email || !password) {
+    res.send("email and password cannot be entered");
+    return;
+  }
+  const user = getUserByEmail(users, email)
+  if (!user) {
+    res.redirect("/login")
+    return;
+  }
+  const id = user.id
+  res.cookie("user_id", id)
+  res.redirect("/urls")
+  /*console.log('hello', req.body);
   res.cookie('username', req.body.username);
-  res.redirect("/urls");
+  res.redirect("/urls");*/
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls")
 });
 
 app.get("/register", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies["username"]};
+  const templateVars = { urls: urlDatabase, username: req.cookies["user_id"]};
   res.render("urls_register", templateVars);
 });
 
@@ -115,14 +128,10 @@ app.post("/register", (req, res) => {
     email, 
     password
   }
-  res.cookie('username', id);
+  res.cookie('user_id', id);
   console.log(users)
   res.redirect("/urls")
 })
-
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
 
 const getUserByEmail = function(userDB, email) {
   for (let userID in userDB) {
@@ -131,10 +140,14 @@ const getUserByEmail = function(userDB, email) {
       return userObj;
     } 
   }
-  return null;
+  return false;
 }
 
 app.get("/login", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies["username"]};
+  const templateVars = { urls: urlDatabase, username: req.cookies["user_id"]};
   res.render("urls_login", templateVars);
+});
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
 });
