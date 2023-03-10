@@ -1,8 +1,9 @@
-const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const bcrypt = require("bcryptjs");
+const { getUserByEmail, getUserUrls, generateRandomString } = require('./helpers')
 
 app.set("view engine", "ejs");
 
@@ -31,7 +32,7 @@ const urlDatabase = {
 };
 
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser())
+app.use(cookieSession())
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -48,11 +49,10 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const userId = req.cookies["user_id"]
+  const userId = req.session.user_id
   console.log("#1 userId", userId)
   const urlsForUser = getUserUrls(urlDatabase, userId)
   console.log("#2 urlsForUser", urlsForUser)
-  // const templateVars = { urls: urlsForUser, username: req.cookies["username"]};
   const user = users[userId]
   const templateVars = {
     urls: urlsForUser,
@@ -62,7 +62,8 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  if (req.cookies["user_id"]) {
+  const userId = req.session.user_id
+  if (userId) {
     res.render("urls_new")
   } else {
     res.redirect("/login")
@@ -70,13 +71,15 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, username:req.cookies["username"]};
+  const userId = req.session.user_id
+  const user = users[userId]
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, username: user.email};
   res.render("urls_show", templateVars);
 });
 
 app.post("/urls", (req, res) => {
-  const userID = req.cookies["user_id"]
-  if (!userID) {
+  const userId = req.session.user_id
+  if (!userId) {
     res.send('User is not logged in, cannot shorten url.')
     return;
   }
@@ -84,14 +87,10 @@ app.post("/urls", (req, res) => {
   let longURL = req.body.longURL;
   urlDatabase[id] = {
     longURL,
-    userID
+    userID: userId
   };
   res.redirect(`/urls/${id}`);
 });
-
-function generateRandomString() {
-  return Math.random().toString(36).substr(2, 6);
-}
 
 app.get("/u/:id", (req, res) => {
   if (!urlDatabase[req.params.id]) {
@@ -128,17 +127,18 @@ app.post("/login", (req, res) => {
     return res.status(401).send("unauthorized")
   }
   const id = user.id;
-  res.cookie("user_id", id);
+  req.session.user_id = id
   res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session = null;
   res.redirect("/urls");
 });
 
 app.get("/register", (req, res) => {
-  if (req.cookies["user_id"]) {
+  const userId = req.session.user_id
+  if (userId) {
     res.redirect("/urls")
   } else {
     res.render("urls_register");
@@ -165,25 +165,15 @@ app.post("/register", (req, res) => {
     email, 
     password: bcrypt.hashSync(password, 10),
   }
-  res.cookie('user_id', id);
+  req.session.user_id = id
   console.log(users);
   res.redirect("/urls");
 })
 
-const getUserByEmail = function(userDB, email) {
-  for (let userID in userDB) {
-    const userObj = userDB[userID];
-    if (userObj.email === email) {
-      return userObj;
-    } 
-  }
-  return false;
-}
-
 app.get("/login", (req, res) => {
-  console.log(req.cookies)
-  const templateVars = { urls: urlDatabase, username: req.cookies["user_id"]};
-  if (req.cookies["user_id"]) {
+  const userId = req.session.user_id
+  const templateVars = { urls: urlDatabase, username: ""};
+  if (userId) {
     res.redirect("/urls")
   } else {
     res.render("urls_login", templateVars);
@@ -193,13 +183,3 @@ app.get("/login", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-const getUserUrls = function(urlDatabase, userId) {
-  const newUrlObj = {};
-  for (let shortId in urlDatabase) {
-    if (urlDatabase[shortId].userID === userId) {
-      newUrlObj[shortId] = urlDatabase[shortId];
-    }
-  }
-  return newUrlObj;
-}
