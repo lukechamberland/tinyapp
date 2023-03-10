@@ -34,7 +34,7 @@ const urlDatabase = {
 };
 
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieSession())
+app.use(cookieSession());
 
 app.get("/", (req, res) => {
   res.send("Hello!");
