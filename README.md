@@ -1,6 +1,6 @@
 # Luke's TinyApp Project
 
-This project was completed as part of week 6-7 of the Web development bootcamp at lighthouse labs.  The main ideas of this app is to get comfortable using node, as well as express.js.  As for the app itself, it allows users to shorten long url's into shorter ones.  The app also allows users to register and login, ensuring a safe protection of your password.  It essentially runs the same way any other web application runs, in the sense of register, and login/logout.  
+This project was completed as part of week 6-7 of the Web development bootcamp at lighthouse labs.  The main ideas of this app is to get comfortable using node, as well as express.js.  As for the app itself, it allows a simple way for users to shorten long url's into shorter ones.  The app also allows users to register and login, ensuring a safe protection of your password.  It essentially runs the same way any other web application runs, in the sense of register and login/logout.  
 
 ## My expirience
 
@@ -8,7 +8,7 @@ Overall this project was a challenge for me, but having completed it I've gained
 
 ## Final Product
 
-!["screenshot description"](#)
+!["The 'main' page of the app.  This is where users will start, regardless of registration/login"](https://github.com/lukechamberland/tinyapp/blob/master/Screenshot%202023-03-10%20at%203.59.52%20PM.png)
 !["screenshot description"](#)
 
 ## Dependencies
