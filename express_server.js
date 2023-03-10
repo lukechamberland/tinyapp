@@ -1,9 +1,11 @@
+// requirements:
+
 const cookieSession = require("cookie-session");
 const express = require("express");
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = 8080; 
 const bcrypt = require("bcryptjs");
-const { getUserByEmail, getUserUrls, generateRandomString } = require('./helpers')
+const { getUserByEmail, getUserUrls, generateRandomString } = require('./helpers');
 
 app.set("view engine", "ejs");
 
@@ -38,7 +40,7 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-
+// routes:
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
@@ -49,11 +51,9 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const userId = req.session.user_id
-  console.log("#1 userId", userId)
-  const urlsForUser = getUserUrls(urlDatabase, userId)
-  console.log("#2 urlsForUser", urlsForUser)
-  const user = users[userId]
+  const userId = req.session.user_id;
+  const urlsForUser = getUserUrls(urlDatabase, userId);
+  const user = users[userId];
   const templateVars = {
     urls: urlsForUser,
     user
@@ -62,25 +62,25 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const userId = req.session.user_id
+  const userId = req.session.user_id;
   if (userId) {
-    res.render("urls_new")
+    res.render("urls_new");
   } else {
-    res.redirect("/login")
+    res.redirect("/login");
   }
 });
 
 app.get("/urls/:id", (req, res) => {
-  const userId = req.session.user_id
-  const user = users[userId]
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, username: user.email};
+  const userId = req.session.user_id;
+  const user = users[userId];
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, username: user.email}
   res.render("urls_show", templateVars);
 });
 
 app.post("/urls", (req, res) => {
-  const userId = req.session.user_id
+  const userId = req.session.user_id;
   if (!userId) {
-    res.send('User is not logged in, cannot shorten url.')
+    res.send('User is not logged in, cannot shorten url.');
     return;
   }
   let id = generateRandomString();
@@ -94,7 +94,7 @@ app.post("/urls", (req, res) => {
 
 app.get("/u/:id", (req, res) => {
   if (!urlDatabase[req.params.id]) {
-    res.send('Does not exist in the database')
+    res.send('Does not exist in the database');
     return;
   }
   
@@ -124,10 +124,10 @@ app.post("/login", (req, res) => {
     return;
   }
   if (!bcrypt.compareSync(password, user.password)) {
-    return res.status(401).send("unauthorized")
+    return res.status(401).send("unauthorized");
   }
   const id = user.id;
-  req.session.user_id = id
+  req.session.user_id = id;
   res.redirect("/urls");
 });
 
@@ -137,9 +137,9 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const userId = req.session.user_id
+  const userId = req.session.user_id;
   if (userId) {
-    res.redirect("/urls")
+    res.redirect("/urls");
   } else {
     res.render("urls_register");
   }
@@ -165,16 +165,16 @@ app.post("/register", (req, res) => {
     email, 
     password: bcrypt.hashSync(password, 10),
   }
-  req.session.user_id = id
+  req.session.user_id = id;
   console.log(users);
   res.redirect("/urls");
 })
 
 app.get("/login", (req, res) => {
-  const userId = req.session.user_id
+  const userId = req.session.user_id;
   const templateVars = { urls: urlDatabase, username: ""};
   if (userId) {
-    res.redirect("/urls")
+    res.redirect("/urls");
   } else {
     res.render("urls_login", templateVars);
   }
