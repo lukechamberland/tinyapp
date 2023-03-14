@@ -17,7 +17,14 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
-    </div>
+    </div>  
+    <% if (userId) { %>
+        <form action="/logout" method="POST">
+          <button type="submit">
+           logout
+          </button>
+        </form>
+      <%  } %>
       <a class="nav-item nav-link" href="/register">register</a>
   </nav>
 </header>

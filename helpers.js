@@ -1,3 +1,5 @@
+// checks if email is already in database
+
 const getUserByEmail = function(userDB, email) {
   for (let userID in userDB) {
     const userObj = userDB[userID];
@@ -17,7 +19,7 @@ const getUserUrls = function(urlDatabase, userId) {
   }
   return newUrlObj;
 }
-
+// generates random 6 digit string
 function generateRandomString() {
   return Math.random().toString(36).substr(2, 6);
 }

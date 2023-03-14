@@ -42,6 +42,16 @@ app.use(cookieSession({
 
 // routes:
 
+//main route
+app.get("/", (req, res) => {
+  const userId = req.session.user_id;
+  if (userId) {
+    res.redirect("/urls")
+  } else {
+    res.redirect("/login")
+  }
+})
+
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
@@ -52,7 +62,8 @@ app.get("/urls", (req, res) => {
   const user = users[userId];
   const templateVars = {
     urls: urlsForUser,
-    user
+    user,
+    userId
   }
   res.render("urls_index", templateVars);
 });
@@ -60,32 +71,35 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const userId = req.session.user_id;
   if (userId) {
-    res.render("urls_new");
+    res.render("urls_new", {userId});
   } else {
     res.redirect("/login");
   }
 });
 
 app.get("/urls/:id", (req, res) => {
-  const userId = req.session.user_id;
-  const user = users[userId];
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, username: user.email}
-  res.render("urls_show", templateVars);
-});
 
-app.post("/urls", (req, res) => {
   const userId = req.session.user_id;
-  if (!userId) {
-    res.send('User is not logged in, cannot shorten url.');
+  if (!urlDatabase[req.params.id]) {
+    res.send('Error occured, invalid URL')
     return;
   }
-  let id = generateRandomString();
-  let longURL = req.body.longURL;
-  urlDatabase[id] = {
-    longURL,
-    userID: userId
-  };
-  res.redirect(`/urls/${id}`);
+  //1. Check whether the user is logged in 
+  if(!userId){
+    return res.send("Please login to view the details");
+  }
+  //2. The user session is there. Ensure that the shortURL belongs 
+  //to the signed in USER
+  if(urlDatabase[req.params.id].userID === userId){
+      const user = users[userId];
+      console.log(user)
+      const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, userId}
+      res.render("urls_show", templateVars);
+  } else {
+    //3. Means the Url didn't belong to the Logged in User
+    return res.send("The ShortURL does not belong to you!")
+  }
+ 
 });
 
 app.get("/u/:id", (req, res) => {
@@ -97,17 +111,78 @@ app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
   res.redirect(longURL);
 });
+// allows users to signup
+app.get("/register", (req, res) => {
+  const userId = req.session.user_id;
+  if (userId) {
+    res.redirect("/urls");
+  } else {
+    res.render("urls_register", {userId});
+  }
+});
+//if registration exists in url database users can login
+app.get("/login", (req, res) => {
+  const userId = req.session.user_id;
+  const templateVars = { urls: urlDatabase, userId: ""};
+  if (userId) {
+    res.redirect("/urls");
+  } else {
+    res.render("urls_login", templateVars);
+  }
+});
+// forces user to login
+app.post("/urls", (req, res) => {
+  const userId = req.session.user_id;
+  const user = users[userId]
+  if (!user) {
+    res.send('User is not logged in, cannot shorten url.');
+    return;
+  }
+
+  let id = generateRandomString();
+  let longURL = req.body.longURL;
+  urlDatabase[id] = {
+    longURL,
+    userID: userId
+  };
+  res.redirect(`/urls/${id}`);
+});
 
 app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id];
+  const userId = req.session.user_id;
+  const user = users[userId];
+  if (!user) {
+    res.send('User is not logged in, cannot shorten url.');
+    return;
+  }
+  const shortUrl = req.params.id
+  if (urlDatabase[shortUrl].userID !== userId) {
+    res.send("Cannot delete URL that doesn't belong to you.")
+    return;
+  }
+  delete urlDatabase[shortUrl];
   res.redirect("/urls");
+  
 });
 
 app.post("/urls/:id", (req, res) => {
+  // checking login
+  const userId = req.session.user_id;
+  const user = users[userId];
+  if (!user) {
+    res.send('User is not logged in, cannot shorten url.');
+    return;
+  }
+  // check if they own url
+  const shortUrl = req.params.id
+  if (urlDatabase[shortUrl].userID !== userId) {
+    res.send("Cannot edit URL that doesn't belong to you.")
+    return;
+  }
   urlDatabase[req.params.id] = req.body.longURL;
   res.redirect("/urls");
 });
-
+// ensures empty email and password wont login
 app.post("/login", (req, res) => {
   const {email, password} = req.body;
   if (!email || !password) {
@@ -129,16 +204,7 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   req.session = null;
-  res.redirect("/urls");
-});
-
-app.get("/register", (req, res) => {
-  const userId = req.session.user_id;
-  if (userId) {
-    res.redirect("/urls");
-  } else {
-    res.render("urls_register");
-  }
+  res.redirect("/login");
 });
 
 app.post("/register", (req, res) => {
@@ -164,16 +230,6 @@ app.post("/register", (req, res) => {
   req.session.user_id = id;
   console.log(users);
   res.redirect("/urls");
-})
-
-app.get("/login", (req, res) => {
-  const userId = req.session.user_id;
-  const templateVars = { urls: urlDatabase, username: ""};
-  if (userId) {
-    res.redirect("/urls");
-  } else {
-    res.render("urls_login", templateVars);
-  }
 });
 
 app.listen(PORT, () => {
