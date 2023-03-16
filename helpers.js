@@ -1,18 +1,17 @@
 // checks if email is already in database
 
 const getUserByEmail = function(userDB, email) {
-  for (let userID in userDB) {
+  for (const userID in userDB) {
     const userObj = userDB[userID];
     if (userObj.email === email) {
       return userObj;
     } 
   }
-  return undefined;
 }
 
 const getUserUrls = function(urlDatabase, userId) {
   const newUrlObj = {};
-  for (let shortId in urlDatabase) {
+  for (const shortId in urlDatabase) {
     if (urlDatabase[shortId].userID === userId) {
       newUrlObj[shortId] = urlDatabase[shortId];
     }

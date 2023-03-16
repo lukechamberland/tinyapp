@@ -6,32 +6,10 @@ const app = express();
 const PORT = 8080; 
 const bcrypt = require("bcryptjs");
 const { getUserByEmail, getUserUrls, generateRandomString } = require('./helpers');
+const { users, urlDatabase } = require("./databases");
+
 
 app.set("view engine", "ejs");
-
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
-  },
-};
-
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW",
-  },
-};
 
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieSession({
@@ -58,6 +36,9 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const userId = req.session.user_id;
+  if(!userId) {
+    return res.redirect("/login");
+  }
   const urlsForUser = getUserUrls(urlDatabase, userId);
   const user = users[userId];
   const templateVars = {
@@ -71,7 +52,9 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const userId = req.session.user_id;
   if (userId) {
-    res.render("urls_new", {userId});
+    const user = users[userId];
+    const templateVars = {user}
+    res.render("urls_new", templateVars);
   } else {
     res.redirect("/login");
   }
@@ -80,50 +63,61 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
 
   const userId = req.session.user_id;
-  if (!urlDatabase[req.params.id]) {
-    res.send('Error occured, invalid URL')
-    return;
-  }
+  const shortId = req.params.id
   //1. Check whether the user is logged in 
   if(!userId){
     return res.send("Please login to view the details");
   }
+  if (!urlDatabase[shortId]) {
+    res.send('Error occured, invalid URL')
+    return;
+  }
   //2. The user session is there. Ensure that the shortURL belongs 
   //to the signed in USER
-  if(urlDatabase[req.params.id].userID === userId){
+  if(urlDatabase[shortId].userID === userId){
       const user = users[userId];
-      console.log(user)
-      const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, userId}
+      const templateVars = { 
+        id: shortId, 
+        longURL: urlDatabase[shortId].longURL, 
+        user, 
+      }
       res.render("urls_show", templateVars);
   } else {
-    //3. Means the Url didn't belong to the Logged in User
+    //3. Means the Url didn't belong to the logged in User
     return res.send("The ShortURL does not belong to you!")
   }
  
 });
 
 app.get("/u/:id", (req, res) => {
-  if (!urlDatabase[req.params.id]) {
+  const userId = req.session.user_id;
+  if (!userId) {
+    return res.redirect('/login')
+  }
+  const shortId = req.params.id
+  if (!urlDatabase[shortId]) {
     res.send('Does not exist in the database');
     return;
   }
   
-  const longURL = urlDatabase[req.params.id];
-  res.redirect(longURL);
+  const longURL = urlDatabase[shortId].longURL;
+  return res.redirect(longURL);
 });
 // allows users to signup
 app.get("/register", (req, res) => {
   const userId = req.session.user_id;
+  const user = users[userId]
   if (userId) {
     res.redirect("/urls");
   } else {
-    res.render("urls_register", {userId});
+    const templateVars = {user}
+    res.render("urls_register", templateVars);
   }
 });
 //if registration exists in url database users can login
 app.get("/login", (req, res) => {
   const userId = req.session.user_id;
-  const templateVars = { urls: urlDatabase, userId: ""};
+  const templateVars = { user: null };
   if (userId) {
     res.redirect("/urls");
   } else {
@@ -208,12 +202,10 @@ app.post("/logout", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  console.log(req.body);
   const {email, password} = req.body;
   if(!email || !password) {
-    res.statusMessage = "Enter email and password. ";
-    res.status(400).end();
-    return; 
+    res.status(400).send("Enter email and password. ");;
+    return;
   }
   
   const user = getUserByEmail(users, email);
@@ -228,7 +220,6 @@ app.post("/register", (req, res) => {
     password: bcrypt.hashSync(password, 10),
   }
   req.session.user_id = id;
-  console.log(users);
   res.redirect("/urls");
 });
 
