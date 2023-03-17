@@ -90,10 +90,6 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
-  const userId = req.session.user_id;
-  if (!userId) {
-    return res.redirect('/login')
-  }
   const shortId = req.params.id
   if (!urlDatabase[shortId]) {
     res.send('Does not exist in the database');
@@ -185,8 +181,7 @@ app.post("/login", (req, res) => {
   }
   const user = getUserByEmail(users, email);
   if (!user) {
-    res.redirect("/login");
-    return;
+    return res.status(401).send("Email not found, please register.");
   }
   if (!bcrypt.compareSync(password, user.password)) {
     return res.status(401).send("unauthorized");
