@@ -169,7 +169,10 @@ app.post("/urls/:id", (req, res) => {
     res.send("Cannot edit URL that doesn't belong to you.")
     return;
   }
-  urlDatabase[req.params.id] = req.body.longURL;
+  urlDatabase[req.params.id] = {
+    longURL: req.body.longURL,
+    userID: userId,
+  };
   res.redirect("/urls");
 });
 // ensures empty email and password wont login
